@@ -1,4 +1,4 @@
-# workertest
+# worker-testbed
 
 > The AI-ready testbed which use Worker Threads to create isolated vm context
 
@@ -7,7 +7,7 @@ A worker-threads based test framework using `Node.js`, `tape`, and `functools-ki
 ## Usage
 
 ```tsx
-import { run, test } from 'workertest';
+import { run, test } from 'worker-testbed';
 
 test("Will pass after three seconds", (t) => {
     globalThis.test = {};
