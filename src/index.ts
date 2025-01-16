@@ -43,6 +43,8 @@ export const test = async (testName: string, cb: (t: ITest) => void) => {
   tape(testName, async (test) => {
     const [awaiter, { resolve }] = createAwaiter<void>();
 
+    let isFinished = false;
+
     const worker = new Worker(workerFile, {
       workerData: { testName },
     });
@@ -53,6 +55,8 @@ export const test = async (testName: string, cb: (t: ITest) => void) => {
       } else if (status === "fail") {
         test.fail(msg);
       }
+      isFinished = true;
+      worker.terminate();
       resolve();
     });
 
@@ -62,6 +66,9 @@ export const test = async (testName: string, cb: (t: ITest) => void) => {
     });
 
     worker.on("exit", (code) => {
+      if (isFinished) {
+        return;
+      }
       if (code !== 0) {
         test.fail(`Worker stopped with exit code ${code}`);
         resolve();
