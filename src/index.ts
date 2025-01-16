@@ -1,7 +1,7 @@
 import { Worker, isMainThread, workerData, parentPort } from "worker_threads";
 import { fileURLToPath } from "url";
 
-import { ToolRegistry, createAwaiter, BehaviorSubject, Subject } from "functools-kit";
+import { ToolRegistry, createAwaiter, BehaviorSubject, Subject, singleshot } from "functools-kit";
 
 import tape from "tape";
 
@@ -84,7 +84,7 @@ export const test = async (testName: string, cb: (t: ITest) => void) => {
   });
 };
 
-export const run = async (__filename: string, cb: () => void = () => { }) => {
+export const run = singleshot(async (__filename: string, cb: () => void = () => { }) => {
   if (isMainThread) {
     await workerFileSubject.next(fileURLToPath(__filename));
     await finishSubject.filter(() => testCounter === 0).toPromise();
@@ -100,4 +100,4 @@ export const run = async (__filename: string, cb: () => void = () => { }) => {
     pass: (msg) => parentPort!.postMessage({ status: "pass", msg }),
     fail: (msg) => parentPort!.postMessage({ status: "fail", msg }),
   });
-};
+});
