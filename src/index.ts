@@ -1,13 +1,15 @@
 import { Worker, isMainThread, workerData, parentPort } from "worker_threads";
 import { fileURLToPath } from "url";
 
-import { ToolRegistry, createAwaiter, BehaviorSubject } from "functools-kit";
+import { ToolRegistry, createAwaiter, BehaviorSubject, Subject } from "functools-kit";
 
 import tape from "tape";
 
 const workerFileSubject = new BehaviorSubject<string>();
+const finishSubject = new Subject<void>();
 
 let testRegistry = new ToolRegistry<Record<string, TestWrapper>>("workertest");
+let testCounter = 0;
 
 const waitForFile = async () => {
   if (workerFileSubject.data) {
@@ -35,6 +37,8 @@ export const test = async (testName: string, cb: (t: ITest) => void) => {
   }
   
   const workerFile = await waitForFile();
+
+  testCounter += 1;
 
   tape(testName, async (test) => {
     const [awaiter, { resolve }] = createAwaiter<void>();
@@ -64,13 +68,20 @@ export const test = async (testName: string, cb: (t: ITest) => void) => {
       }
     });
 
-    return await awaiter;
+    {
+      await awaiter;
+      testCounter -= 1;
+      await finishSubject.next();
+    }
+
   });
 };
 
-export const run = async (__filename: string) => {
+export const run = async (__filename: string, cb: () => void = () => { }) => {
   if (isMainThread) {
     await workerFileSubject.next(fileURLToPath(__filename));
+    await finishSubject.filter(() => testCounter === 0).toPromise();
+    cb();
     return;
   }
 

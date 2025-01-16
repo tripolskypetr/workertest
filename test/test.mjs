@@ -14,4 +14,6 @@ test("Will fail after a second", (t) => {
     }, 1_000);
 })
 
-run(import.meta.url)
+run(import.meta.url, () => {
+    process.exit(-1)
+})

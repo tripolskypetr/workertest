@@ -3,6 +3,6 @@ interface ITest {
     fail(msg?: string): void;
 }
 declare const test: (testName: string, cb: (t: ITest) => void) => Promise<void>;
-declare const run: (__filename: string) => Promise<void>;
+declare const run: (__filename: string, cb?: () => void) => Promise<void>;
 
 export { run, test };
