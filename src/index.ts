@@ -1,7 +1,7 @@
 import { Worker, isMainThread, workerData, parentPort } from "worker_threads";
 import { fileURLToPath } from "url";
 
-import { ToolRegistry, createAwaiter, BehaviorSubject, Subject, singleshot } from "functools-kit";
+import { ToolRegistry, createAwaiter, BehaviorSubject, Subject, singleshot, getErrorMessage } from "functools-kit";
 
 import tape from "tape";
 
@@ -61,7 +61,7 @@ export const test = async (testName: string, cb: (t: ITest) => void) => {
     });
 
     worker.on("error", (err) => {
-      test.fail(`Worker error: ${err.message}`);
+      test.fail(`Worker error: ${getErrorMessage(err)}`);
       resolve();
     });
 
