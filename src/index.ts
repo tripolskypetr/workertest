@@ -96,12 +96,9 @@ export const run = singleshot(async (__filename: string, cb: () => void = () => 
     throw new Error("workertest parentPort is null");
   }
 
-  try {
-    testRegistry.get(workerData.testName).cb({
-      pass: (msg) => parentPort!.postMessage({ status: "pass", msg }),
-      fail: (msg) => parentPort!.postMessage({ status: "fail", msg }),
-    });
-  } catch {
-  }
+  testRegistry.get(workerData.testName).cb({
+    pass: (msg) => parentPort!.postMessage({ status: "pass", msg }),
+    fail: (msg) => parentPort!.postMessage({ status: "fail", msg }),
+  });
 
 });
